@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Researching Charity Dissolution
 
 Welcome, this website describes resources, tools and information for researching charity dissolution in multiple jurisdictions.
