@@ -1,0 +1,30 @@
+# Mission Accomplished? A Cross-national Examination of Charity Dissolution
+
+## Data Collection [April - June 2019]
+
+### Key tasks:
+
+1. Write scripts to collect data from the following charity regulators:
+	* Charity Commission for England and Wales
+	* Charity Commission for Northern Ireland
+	* Charities Regulator (Rep. of Ireland)
+	* Scottish Charity Regulator
+	* Charities Services (New Zealand)
+	* Australian Charities and Not-for-profits Commission
+	* Canada Revenue Agency
+	* Charity Portal (Singapore)
+	* Internal Revenue Service (US)
+	* Japan (if time allows)
+	* China (if time allows)
+<br>
+
+2. 	Refine and standardise the scripts e.g. create functions, master download files etc.
+<br>
+
+3. Capture metadata associated with the data download e.g. produce a schema or table of metadata associated with each jurisdiction's data.
+<br>
+
+
+## Data Wrangling [July - August 2019]
+
+### Key tasks:
