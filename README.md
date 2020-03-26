@@ -1,12 +1,12 @@
 <div align="center"><img src="./images/BA_Primary-Logo-Black.png" alt="British Academy logo" width="450" height="150"></div>
 
-</ br>
+<br/>
 
 <h1 align=center>Researching Charity Dissolution</h1>
 
 Welcome, this repository provides data, code and information for researching charity dissolution in multiple jurisdictions. 
 
-It is based on work completed during a British Academy funded project (2019-2020): *Mission Accomplished: A Cross-national Examination of Charity Dissolution*.
+It is based on the work completed during a British Academy funded project (2019-2020): *Mission Accomplished: A Cross-national Examination of Charity Dissolution*.
 
 ### Context
 
