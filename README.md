@@ -1,6 +1,6 @@
-<div align="center"><img src="./images/BA_Primary-Logo-Black.png" alt="British Academy logo" width="400" height="200"></div>
+<div align="center"><img src="./images/BA_Primary-Logo-Black.png" alt="British Academy logo" width="500" height="170"></div>
 
-<h1 align=center>Researching Charity Dissolution<\h1>
+<h1 align=center>Researching Charity Dissolution</h1>
 
 Welcome, this repository provides data, code and information for researching charity dissolution in multiple jurisdictions. 
 
