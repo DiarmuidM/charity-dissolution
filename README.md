@@ -1,10 +1,12 @@
-<div align="center"><img src="./images/BA_Primary-Logo-Black.png" alt="British Academy logo" width="500" height="170"></div>
+<div align="center"><img src="./images/BA_Primary-Logo-Black.png" alt="British Academy logo" width="450" height="150"></div>
+
+</ br>
 
 <h1 align=center>Researching Charity Dissolution</h1>
 
 Welcome, this repository provides data, code and information for researching charity dissolution in multiple jurisdictions. 
 
-It is based on the work completed during a British Academy funded project (2019-2020): *Mission Accomplished: A Cross-national Examination of Charity Dissolution*.
+It is based on work completed during a British Academy funded project (2019-2020): *Mission Accomplished: A Cross-national Examination of Charity Dissolution*.
 
 ### Context
 
@@ -15,10 +17,10 @@ Encouraged by ‘open data’ movements, regulators have made it increasingly straig
 The project website contains the most-up-date information about this work, as well as short guides on how to research this topic: [https://diarmuidm.github.io/charity-dissolution](https://diarmuidm.github.io/charity-dissolution)
 
 The repository can be navigated as follows:
+* **conferences** - papers and presentations from our participation in various nonprofit/charity conferences (2018-2019)
 * **data** - links to open datasets produced by this project
 * **papers** - working and conference papers documenting analysis conducted by the project team
 * **syntax** - code, written in Python and Stata, for collecting, cleaning and analysing data on charity dissolution
-* **conferences** - papers and presentations from our participation in various nonprofit/charity conferences (2018-2019)
 
 The **docs** and **images** folders are for administrative purposes and are unlikely to be of interest.
 
