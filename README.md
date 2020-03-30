@@ -34,3 +34,6 @@ This repository will be updated on a regular basis for the foreseeable future. I
 We would like to thank the British Academy for providing funding for this work through its Small Research Grant scheme. We would also like to thank charity regulators for providing continually improving ways of accessing data about charities.
 And finally to the charities themselves for conducting such important work.
 
+[Dr Diarmuid McDonnell, University of Manchester](mailto:diarmuid.mcdonnell@manchester.ac.uk) </ br>
+[Professor Alasdair Rutherford, University of Stirling](https://www.stir.ac.uk/people/255778) </ br>
+[Professor Carolyn Cordery, Aston Business School](https://research.aston.ac.uk/en/persons/carolyn-j-cordery)
