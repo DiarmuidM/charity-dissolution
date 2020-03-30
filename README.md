@@ -10,7 +10,7 @@ It is based on the work completed during a British Academy funded project (2019-
 
 ### Context
 
-Encouraged by ‘open data’ movements, regulators have made it increasingly straightforward for stakeholders to access large-scale data about charities and their regulation. This project leverages some of these data resources to examine a topic of considerable public and regulatory importance: charity dissolution. This project undertakes work to collect, clean, harmonise and analyse international data on charity dissolution. In doing so we identify real opportunities for interdisciplinary collaboration to understand this important topic.
+Encouraged by â€˜open dataâ€™ movements, regulators have made it increasingly straightforward for stakeholders to access large-scale data about charities and their regulation. This project leverages some of these data resources to examine a topic of considerable public and regulatory importance: charity dissolution. This project undertakes work to collect, clean, harmonise and analyse international data on charity dissolution. In doing so we identify real opportunities for interdisciplinary collaboration to understand this important topic.
 
 ### Navigating the repository
 
@@ -22,7 +22,7 @@ The repository can be navigated as follows:
 * **papers** - working and conference papers documenting analysis conducted by the project team
 * **syntax** - code, written in Python and Stata, for collecting, cleaning and analysing data on charity dissolution
 
-The **docs** and **images** folders are for administrative purposes and are unlikely to be of interest.
+The **images** folder is for administrative purposes and unlikely to be of interest.
 
 ### Contact:
 
