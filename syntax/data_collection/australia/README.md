@@ -13,8 +13,9 @@ The easiest means of installing Python is to download the free Anaconda distribu
 
 ### Step 2 - Create folder to store code and data
 
-Open your CLI and type the following commands one-by-one:
+Open your CLI and type the following commands one-by-one (ignore ones beginning with #):
 ```
+# Windows
 mkdir aus-char-data
 cd aus-char-data
 ```
