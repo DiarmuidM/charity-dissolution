@@ -1,4 +1,4 @@
-# Australia Data Download
+# Australia Charity Data Download
 
 This is a Python app that allows a user to collect data about Australian charities from the national regulator - <a href="https://www.acnc.gov.au/" target=_blank>Australian Charities and Not-for-profit Commission (ACNC)</a>.
 
