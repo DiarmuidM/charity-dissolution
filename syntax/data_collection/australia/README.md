@@ -26,7 +26,7 @@ This creates a new folder on your machine for storing the files. Now place the f
 
 ### Step 3 - Create a virtual environment
 
-The next step is to enable the *aus-char-data* folder to run Python code. Open your CLI and type the following command:
+The next step is to enable the *aus-char-data* folder to run Python code:
 ```
 python -m venv env
 ```
@@ -42,7 +42,7 @@ source env/bin/activate
 
 ### Step 4 - Run a test
 
-Let's check we can execute the code. Type the following into the CLI:
+Let's check we can execute the code:
 ```
 python aus-charity-data-download.py test
 ```
@@ -51,7 +51,7 @@ You should see some text putput if the code runs successfully.
 
 ### Step 5 - Run other functions
 
-Now that you can run the code, it's time to download the data. Type the following into the CLI to see which functions you can run:
+Now that you can run the code, it's time to download the data. First, see which functions are available:
 ```
 python aus-charity-data-download.py -h
 ```
