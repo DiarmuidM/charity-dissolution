@@ -1,8 +1,8 @@
 # Australia Charity Data Download
 
-This is a Python app that allows a user to collect data about Australian charities from the national regulator - <a href="https://www.acnc.gov.au/" target=_blank>Australian Charities and Not-for-profit Commission (ACNC)</a>.
+This is a Python script that allows a user to collect data about Australian charities from the national regulator - <a href="https://www.acnc.gov.au/" target=_blank>Australian Charities and Not-for-profit Commission (ACNC)</a>.
 
-The app is run using the Command Line Interface (CLI); Don't worry if you are unfamiliar with this approach, detailed instructions are provided below.
+The script is run using the Command Line Interface (CLI); Don't worry if you are unfamiliar with this approach, detailed instructions are provided below.
 
 ### Step 1 - Install Python
 
