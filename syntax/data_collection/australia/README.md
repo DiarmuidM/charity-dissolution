@@ -11,4 +11,30 @@ The easiest means of installing Python is to download the free Anaconda distribu
 * <a href="https://www.anaconda.com/distribution/#linux" target=_blank>Linux download</a>
 * <a href="https://www.anaconda.com/distribution/#macos" target=_blank>Mac download</a>
 
-### Step 2 - 
+### Step 2 - Create folder to store code and data
+
+Open your CLI and type the following commands one-by-one:
+```
+mkdir aus-char-data
+cd aus-char-data
+```
+
+This creates a new folder on your machine for storing the files. Now place the following files in this folder:
+* aus-charity-data-download.py
+* requirements.txt
+
+### Step 3 - Create a virtual environment
+
+The next step is to enable the *aus-char-data* folder to run Python code. Open your CLI and type the following command:
+```
+python -m venv env
+```
+
+Now we need to activate the environment, which depends on you are using Windows, Mac or Linux:
+```
+# Windows
+env\Scripts\activate.bat
+
+# Mac/Linux
+source env/bin/activate
+```
