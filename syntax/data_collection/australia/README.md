@@ -39,7 +39,7 @@ env\Scripts\activate.bat
 source env/bin/activate
 ```
 
-### Step 4 - Run test
+### Step 4 - Run a test
 
 Let's check we can execute the code. Type the following into the CLI:
 ```
