@@ -19,11 +19,10 @@
 
 /** 0. Define paths **/
 
-global dfiles "C:\Users\mcdonndz-local\Dropbox" // location of data files
-global rfiles "C:\Users\mcdonndz-local\Desktop" // location of syntax and outputs
-global diarmuid "C:\Users\mcdonndz-local\Desktop\github\mission_accomp\syntax" // location of "project_paths.doi"
+global dfiles "C:\Users\t95171dm\Dropbox" // location of data files
+global rfiles "C:\Users\t95171dm\projects\charity-dissolution" // location of syntax and outputs
 
-include "$diarmuid\project_paths.doi"
+include "$rfiles\syntax\project_paths.doi"
 
 
 /** 1. Import data **/
@@ -432,7 +431,7 @@ forvalues yr = 2007(1)2019 {
 				allcurren~es  avgnovolun~k  endowmentf~s  membership~s  totalassets   maoritrust~d  receiptsfr~s  propertypl~t  otherresou~s  materialex~3 ///
 				allnoncur~ts  bequests      generalacc~s  netsurplus~r  totalequity   otherreven~t  receiptsof~s  intangible~s  moneypayab~y   ///	 
 				allnoncur~es  buildings     govtgrants~s  newzealand~s  totalexpen~e  otherreven~s  purchaseof~s  investment~y  othercommi~s  materialex~4 ///
-				allotherex~e  cashandban~s  grantspa~enz  numberoffu~s  totalgross~e  fundraisin~s  repayments~s  totalasse~es  guarantees	///
+				allotherex~e  cashandban~s  grantspa~enz  numberoffu~s  totalgross~e  fundraisin~s  repayments~s  totalasse~es  guarantees yearended	///
 				allotherfi~s  computersa~t  grantspa~nnz  numberofpa~s  totalliabi~s  grantsordo~d  receivable~i  capitalcon~s  mater~1label, replace
 
 	keep 		id entitytype name charityregistrationnumber companiesofficenumber dateregistered deregistrationdate deregistrationreasons  endofyeardayofmonth financialpositiondate ///
@@ -446,7 +445,7 @@ forvalues yr = 2007(1)2019 {
 				allnoncur~es  buildings     govtgrants~s  newzealand~s  totalexpen~e  otherreven~s  purchaseof~s  investment~y  othercommi~s  materialex~4 ///
 				allotherex~e  cashandban~s  grantspa~enz  numberoffu~s  totalgross~e  totalliabilities fundraisin~s  repayments~s  totalasse~es  guarantees	numberofparttimeemployees			///
 				mainactivityname activitysummary mainbeneficiaryname mainsectorname activities areasofoperation beneficiaries sectors sourcesoffunds		///
-				geog*
+				geog* yearended
 
 
 	gen date_register = date(dateregistered, "DMY")
@@ -455,13 +454,14 @@ forvalues yr = 2007(1)2019 {
 	format date_deregister %td
 	gen date_annretdue = date(annualreturnduedate, "DMY")
 	format date_annretdue %td
-	gen date_financialpos = date(financialpositiondate	, "DMY")
+	gen date_financialpos = date(yearended, "DMY")
 	format date_financialpos %td	
 	
 	gen deregistered = 0
 	replace deregistered = 1 if date_deregister!=. & date_deregister>=date_register
 	
 	// Get rid of nonsense records
+	
 	drop if charityregistrationnumber=="."
 	drop if date_financialpos ==.
 	drop if year(date_financialpos)>=2020
@@ -485,6 +485,7 @@ forvalues yr = 2007(1)2019 {
 	}
 
 	gen remy = year(date_deregister)
+	gen regy = year(date_register)
 	gen deregevent = 0
 	replace deregevent = 1 if date_deregister!=. & remy==year
 		
@@ -524,9 +525,10 @@ forvalues yr = 2007(1)2019 {
 	replace propofyear = . if propofyear >1.5
 
 	rename id orgid
+	destring orgid, replace
 
-	bysort orgid: egen maxret = max(date_financialpos)
-	gen latestreturn = maxret == date_financialpos
+	by ccnum: egen last_year = max(fin_year)
+	bys ccnum: egen first_year = min(fin_year) // identify first year
 	
 	
 	// Derived variables
@@ -548,6 +550,19 @@ forvalues yr = 2007(1)2019 {
 			- Other measures.
 	*/
 	
+	
+	** Panel characteristics
+	
+	sort ccnum fin_year
+	bys ccnum: gen numobs = _N
+	bys ccnum: gen t = _n	
+	
+	
+	** Drop observations prior to 2007
+	
+	drop if fin_year < 2007
+	
+	
 	** Income 
 	
 	codebook totalgrossincome
@@ -560,6 +575,30 @@ forvalues yr = 2007(1)2019 {
 	foreach var in mninc mdinc {
 		replace `var' = round(`var', 1)
 	}
+	
+		// Missing income
+		
+		gen inc_miss = (itotal==.)
+		tab inc_miss
+		label variable inc_miss "Missing value for income"
+
+	
+		// Zero-income return
+		
+		count if itotal==0
+		gen zinc = (itotal==0)
+		bys ccnum: egen zinc_count = total(zinc)
+		sum zinc zinc_count , detail
+		l ccnum fin_year itotal zinc zinc_count if zinc==1
+		label variable zinc "Income is zero for a given annual return"
+		label variable zinc_count "Total number of zero-income annual returns per charity"
+		
+			// Identify charities that only submitted zero-income returns
+			
+			gen zinc_only = (numobs==zinc_count)
+			distinct ccnum if zinc_only
+			di "`r(ndistinct)' charities have submitted only zero-income returns"
+			label variable zinc_only "Charity has only submitted zero-income returns"
 	
 	
 	** Expenditure
@@ -578,10 +617,78 @@ forvalues yr = 2007(1)2019 {
 		Create log and categorical (by reporting thresholds) versions.
 	*/
 	
-		foreach var in mninc mdinc mnexp mdexp {
-			gen `var'_ln = ln(`var' + 1)
-		}
+		// Zero-expenses return
 		
+		count if etotal==0
+		gen zexp = (etotal==0)
+		bys ccnum: egen zexp_count = total(zexp)
+		sum zexp zexp_count , detail
+		l ccnum fin_year etotal zexp zexp_count if zexp==1
+		label variable zexp "Expenditure is zero for a given annual return"
+		label variable zexp_count "Total number of zero-expenses annual returns per charity"
+		
+			// Identify charities that only submitted zero-expenses returns
+			
+			gen zexp_only = (numobs==zexp_count)
+			distinct ccnum if zexp_only
+			di "`r(ndistinct)' charities have submitted only zero-expenses returns"
+			label variable zexp_only "Charity has only submitted zero-expenses returns"
+			
+		
+		// Zero income and expenditure
+		
+		gen nofin = (zinc==1 & zexp==1)
+		tab nofin
+		distinct ccnum if nofin
+		label variable nofin "Submitted zero income and expenses"
+	
+	
+	** Transform size variables
+	
+	foreach var in mninc mdinc mnexp mdexp {
+		gen `var'_ln = ln(`var' + 1)
+	}
+		
+	
+	** Gaps in filing history
+	
+	encode ccnum, gen(ccnum_int)
+	duplicates drop ccnum_int fin_year, force
+	gen pres = 1
+	
+	tsset ccnum_int fin_year // set as time-series format
+	tsfill, full
+	gen blankobs = (pres==.) // identify newly created observations
+	tab fin_year blankobs
+	/*
+		Every charity now has an observation for every year in the panel.
+	*/
+	
+		// Identify charities that have gaps in their reporting history	
+		
+		sort ccnum_int remy
+		bys ccnum_int: replace remy = remy[1] if remy==. // assign removed year to every observation
+				
+		sort ccnum_int regy
+		bys ccnum_int: replace regy = regy[1] if regy==. // assign registration year to every observation
+
+		sort ccnum_int fin_year
+		
+		gen gap_year = 1 if blankobs==1 & (fin_year > regy) & (fin_year < remy) // identify years where an annual return should have been filed
+		
+		bys ccnum_int: egen gap_year_count = total(gap_year)
+		gen gap_year_dum = (gap_year_count > 0 & gap_year_count!=.)
+		l ccnum_int fin_year pres regy remy itotal inc_miss blankobs first_year gap_year gap_year_count in 1/5000
+		label variable gap_year "Year where charity failed to submit an annual return"
+		label variable gap_year_count "Total number of years where harity failed to submit an annual return"
+		label variable gap_year_dum "Failed to submit at least one annual return"
+		
+		// Drop observations that were created by `tsfill, full' command
+		
+		drop if blankobs
+			
+		sort ccnum fin_year
+	
 	
 	** Debt level and investment income
 	/*
@@ -757,12 +864,15 @@ save "$path1\nz_annualreturns_2007-2019_v1.dta", replace
 
 	use "$path1\nz_annualreturns_2007-2019_v1.dta", clear
 		
-		keep if latestreturn==1
+		keep if last_year==fin_year
 		keep ccnum itotal etotal mninc* mdinc* mnexp* mdexp* volhours paidhours voltotal empft emptotal ///
 			mnvolhours mnpaidhours mnvoltotal mnempft mnemptotal mdvolhours mdpaidhours mdvoltotal mdempft mdemptotal empcomp empcomp_share mnempcomp_share ///
-			funexp funexp_share	fin_year remy sourcesoffunds areaop don_maj mndon_maj don_share mndon_share inc_diverse mninc_diverse
+			funexp funexp_share	fin_year remy sourcesoffunds areaop don_maj mndon_maj don_share mndon_share inc_diverse mninc_diverse ///
+			first_year last_year numobs zinc_count zinc_only zexp_count zexp_only nofin gap_year_count gap_year_dum
 		duplicates report ccnum
 		duplicates drop ccnum, force
+		
+		notes: Not confident in 'gap_year' variables yet.
 	
 	sort ccnum
 	save "$path1\nz_annualreturns_latest.dta", replace
@@ -854,9 +964,7 @@ use $path1\nz_charreg_20190909_v1.dta, clear
 
 
 	// Annual Returns
-	/*
-		STILL WORK TO DO HERE:
-		
+	/*		
 		We want the following variables:
 			- latest annual return year (allows us to calculate age)
 			- latest or mean annual income (allows us to calculate size)
@@ -868,6 +976,11 @@ use $path1\nz_charreg_20190909_v1.dta, clear
 	merge 1:1 ccnum using $path1\nz_annualreturns_latest.dta, keep(match master)
 	rename _merge ar_merge
 
+		gen nonfiler = (ar_merge==1)
+		label variable nonfiler "Never submitted an annual return"
+		
+		
+	
 	// Source of Funds
 	/*
 	sort srcid
