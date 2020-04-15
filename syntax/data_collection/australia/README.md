@@ -30,7 +30,7 @@ The next step is to enable the *aus-char-data* folder to run Python code. Open y
 python -m venv env
 ```
 
-Now we need to activate the environment, which depends on you are using Windows, Mac or Linux:
+Now we need to activate the environment:
 ```
 # Windows
 env\Scripts\activate.bat
@@ -45,6 +45,8 @@ Let's check we can execute the code. Type the following into the CLI:
 ```
 python aus-charity-data-download.py test
 ```
+
+You should see some text putput if the code runs successfully.
 
 ### Step 5 - Run other functions
 
