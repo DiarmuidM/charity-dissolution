@@ -93,12 +93,12 @@ def roc_download(**args):
             with open(outfile, "wb") as f:
                 f.write(response.content)
         
-        print('\r')    
-        print('Successfully downloaded Charity Register')
+        print("\r")    
+        print("Successfully downloaded Charity Register")
 
     else: # file was not successfully requested
-        print('\r')    
-        print('Unable to download Charity Register')
+        print("\r")    
+        print("Unable to download Charity Register")
 
     
     # Create master list of ABNs (CSV format)
@@ -129,6 +129,99 @@ def roc_download(**args):
     print("Charity Register: '{}'; and master file: '{}'".format(outfile, masterfile))
 
  
+
+# Download Annual Information Statements (AUS) #
+
+def ais_download(**args):
+    """
+        Downloads all available Annual Information Statement files from data.gov.au.
+
+        Dependencies:
+            - NONE
+
+        Issues: 
+    """  
+
+    print("Downloading Australian AIS files")
+    print("\r")
+
+
+    # Create folders
+
+    try:
+        os.mkdir("ais")
+        os.mkdir("ais/logs")
+    except OSError as error:
+        print(error)
+        print("Folders already exist")    
+
+    ddate = dt.now().strftime("%Y-%m-%d") # get today's date
+
+
+    # Define URLs of AIS files
+
+    aisdata = ['https://data.gov.au/data/dataset/a1f8626c-fefb-4c4d-86ea-deaa04fb1f6e/resource/8d020b50-700f-4bc4-8c78-79f83d99be7a/download/datadotgov_ais17.xlsx', 
+            'https://data.gov.au/data/dataset/7e073d71-4eef-4f0c-921b-9880fb59b206/resource/b4a08924-af4f-4def-96f7-bf32ada7ee2b/download/datadotgov_ais16.xlsx', 
+            'https://data.gov.au/dataset/86cad799-2601-4f23-b02c-c4c0fc3b6aff/resource/569b8e48-a0ad-4008-9d95-7f91b6cfa2aa/download/20181011_datadotgov_ais15.xlsx', 
+            'https://data.gov.au/dataset/d7992845-5d3b-4868-b012-71f672085412/resource/4d65259d-1ccf-4c78-a223-e2bd49dc5fb1/download/20181011_datadotgov_ais14.xlsx', 
+            'https://data.gov.au/dataset/cc9d8524-39d8-4374-84b9-20e9d1070e82/resource/ce8bf129-9525-4353-a747-d89d8d4b5cc6/download/20181011_datadotgov_ais13.xlsx']
+
+    aisgrpdata = ['https://data.gov.au/data/dataset/a1f8626c-fefb-4c4d-86ea-deaa04fb1f6e/resource/8a18e71a-58d1-414f-adee-c9066560b05c/download/acnc-2017-group-ais-dataset-approved-reporting-groups.xlsx', 
+                'https://data.gov.au/data/dataset/7e073d71-4eef-4f0c-921b-9880fb59b206/resource/8932e61f-0124-48ac-b3be-f3e49f03b33f/download/group-ais16-datagov-final.xlsx',
+                'https://data.gov.au/dataset/86cad799-2601-4f23-b02c-c4c0fc3b6aff/resource/3d57d625-b183-4677-85b1-009b2000ed02/download/2015-ais-group-registered-charities.xls',
+                'https://data.gov.au/dataset/d7992845-5d3b-4868-b012-71f672085412/resource/b3b49610-7f47-41b2-9350-49b7fd8acd93/download/2014-ais-data-for-group-reporting-charities.xlsx']
+
+
+    # Request files
+
+    # AIS returns
+
+    year = 2017
+    for d in aisdata:
+
+        response = requests.get(d) # Search for all charities
+        print(response.status_code, response.headers)
+
+        if response.status_code==200: # if the file was successfully requested
+
+            outfile = "./ais/aus-ais-" + str(year) + ".xlsx"
+            with open(outfile, "wb") as f:
+                f.write(response.content)
+            year -=1
+            print('\r')
+            print("Successfully downloaded {} annual information statement".format(year))
+
+        else: # file was not successfully requested
+            print("\r")    
+            print("Unable to download {} annual information statement".format(year))
+        
+
+    # AIS group returns    
+
+    year = 2017
+    for d in aisgrpdata:
+
+        response = requests.get(d) # Search for all charities
+        print(response.status_code, response.headers)
+
+        if response.status_code==200: # if the file was successfully requested
+
+            outfile = "./ais/aus-ais-group-" + str(year) + ".xlsx"
+            with open(outfile, "wb") as f:
+                f.write(response.content)
+            year -=1
+            print('\r')
+            print("Successfully downloaded {} annual information statement (group returns)".format(year))
+
+        else: # file was not successfully requested
+            print("\r")    
+            print("Unable to download {} annual information statement (group returns)".format(year))    
+
+    print("\r")
+    print("Successfully downloaded all annual information statements")  
+
+
+
 # Collect ACNC web ids for charities
 
 def webid_download(abn: str, **args) -> tuple:
@@ -136,7 +229,7 @@ def webid_download(abn: str, **args) -> tuple:
         Downloads a charity's ACNC web id i.e., its unique identifier
         on the Regulator's website.
 
-        Takes one argument:
+        Takes one mandatory argument:
             - Australian Business Number of a charity
 
         Dependencies:
@@ -181,7 +274,7 @@ def webid_download_from_file(infile: str="./masterfiles/aus-abn-master.csv", **a
         Takes a CSV file containing ABN numbers, extracts them, and returns a file containing
         a webid for each ABN.
 
-        Takes one arguments:
+        Takes one mandatory arguments:
             - CSV file containing a list of abns for Australian charities
 
         Dependencies:
@@ -264,7 +357,7 @@ def webpage_download(webid: str, abn: str, **args):
     """
         Downloads a charity's web page from the ACNC website, which can be parsed at a later date.
 
-        Takes two arguments:
+        Takes two mandatory arguments:
             - website id of charity i.e., its unique identifier on the regulator's website
             - abn of charity, which is its unique organisational id
 
@@ -272,7 +365,7 @@ def webpage_download(webid: str, abn: str, **args):
             - webid_download | webid_download_from_file 
 
         Issues:
-            - does not deal with cases where a charity has more than one web page (e.g., lots of trustees)    
+            - does not deal with cases where a charity has more than one web page (e.g., lots of trustees) [SOLVED]   
     """
 
     print("Downloading Australian Charity Web Pages")
@@ -295,7 +388,7 @@ def webpage_download(webid: str, abn: str, **args):
 
     session = requests.Session()
 
-    webadd = "https://www.acnc.gov.au/charity/" + str(webid) 
+    webadd = "https://www.acnc.gov.au/charity/" + str(webid) + "?page=0"
     response = session.get(webadd)
 
     
@@ -303,17 +396,53 @@ def webpage_download(webid: str, abn: str, **args):
 
     if response.status_code==200:
         html_org = response.text # Get the text elements of the page.
+        soup_org = soup(html_org, "html.parser") # Parse as HTML page
+
+
+        # Find additional pages i.e., when a charity has more than 16 trustees
+
+        if soup_org.find("li", class_="pager-last"):
+            pagination = soup_org.find("li", class_="pager-last").find("a").get("href")
+            numpages = int(pagination[-1:]) + 1
 
 
         # Save results to file
 
-        outfile = "./webpages/aus-charity-" + str(abn) + "-" + ddate + ".txt"
+        pagenum = 1
+        outfile = "./webpages/aus-charity-" + str(abn) + "-page-" + str(pagenum) + "-" + ddate + ".txt"
         with open(outfile, "w") as f:
             f.write(html_org)
 
         print("Downloaded web page of charity: {}".format(abn))    
         print("\r")
         print("Web page file is here: '{}'".format(outfile))
+
+        if numpages > 1: # request the remaining pages
+                 
+            for i in range(1, numpages):
+                webadd = "https://www.acnc.gov.au/charity/" + str(webid) + "?page=" + str(i)
+                response = session.get(webadd)
+
+                if response.status_code==200:
+                    html_org = response.text # Get the text elements of the page.
+                    soup_org = soup(html_org, "html.parser") # Parse as HTML page
+
+                    
+                    # Save results to file
+
+                    pagenum = i + 1
+                    outfile = "./webpages/aus-charity-" + str(abn) + "-page-" + str(pagenum) + "-" + ddate + ".txt"
+                    with open(outfile, "w") as f:
+                        f.write(html_org)
+
+                    print("Downloaded web page of charity: {}".format(abn))    
+                    print("\r")
+                    print("Web page file is here: '{}'".format(outfile))
+
+                else:
+                    print("\r")
+                    print("Could not download web page of charity: {}".format(abn))    
+
 
     else:
         print("\r")
@@ -323,19 +452,19 @@ def webpage_download(webid: str, abn: str, **args):
 
 # Download ACNC web pages of charities - from file #
 
-def webpage_download_from_file(infile: str, **args):
+def webpage_download_from_file(infile: str="./masterfiles/aus-webids-master.csv", **args):
     """
         Takes a CSV file containing webids for Australian charities and
         downloads a charity's web page from the ACNC website, which can be parsed at a later date.
 
-        Takes one argument:
+        Takes one mandatory argument:
             - CSV file containing a list of abns and webids for Australian charities
 
         Dependencies:
             - webid_download | webid_download_from_file 
 
         Issues:
-            - does not deal with cases where a charity has more than one web page (e.g., lots of trustees)
+            - does not deal with cases where a charity has more than one web page (e.g., lots of trustees) [SOLVED]
     """
 
     # Read in data
@@ -365,7 +494,7 @@ def history(source: str, **args):
             - enforcement
             - subtype (i.e., charitable purpose)
 
-        Takes one argument:
+        Takes one mandatory argument:
             - A directory with .txt files containing HTML code of a charity's ACNC web page
 
         Dependencies:
@@ -558,7 +687,7 @@ def reporting(source: str, **args):
         Takes a charity's webpage (.txt file) downloaded from the ACNC website and
         extracts the reporting history of the organisation.
 
-        Takes one argument:
+        Takes one mandatory argument:
             - A directory with .txt files containing HTML code of a charity's ACNC web page
 
         Dependencies:
@@ -705,14 +834,14 @@ def trustees(source: str, **args):
         Takes a charity's webpage (.txt file) downloaded from the ACNC website and
         extracts the trustees (Responsible People) of the organisation.
 
-        Takes one argument:
+        Takes one mandatory argument:
             - A directory with .txt files containing HTML code of a charity's ACNC web page
 
         Dependencies:
             - webpage_download | webpage_download_from_file 
 
         Issues:
-            - does not deal with cases where a charity has more than one web page (e.g., lots of trustees)      
+            - does not deal with cases where a charity has more than one web page (e.g., lots of trustees) [SOLVED]     
     """
 
     # Create folders
@@ -730,6 +859,7 @@ def trustees(source: str, **args):
     # Define output files
 
     trufile = "./trustees/aus-trustees-" + ddate + ".csv"
+    masterfile = "./masterfiles/aus-trustees-master.csv"
 
    
     # Define variable names for the output files
@@ -799,6 +929,194 @@ def trustees(source: str, **args):
     print("Finished extracting trustee data from charity web pages found in: {}".format(source))
 
 
+# Trusteeship Data #
+
+def trustees_webpage_download(t_webid: str, **args):
+    """
+        Downloads a trustee's web page from the ACNC website, which can be parsed at a later date.
+        This web page contains information on other trusteeships held by that individual.
+
+        Takes one mandatory argument:
+            - website id of trustee i.e., its unique identifier on the regulator's website
+
+        Dependencies:
+            - trustees 
+
+        Issues:      
+    """
+
+    # Create folders
+    
+    try:
+        os.mkdir("trustees-webpages")
+        os.mkdir("trustees-webpages/logs")
+    except OSError as error:
+        print(error)
+        print("Folders already exist") 
+
+    ddate = dt.now().strftime("%Y-%m-%d") # get today's date
+    
+
+    # Request web page
+
+    session = requests.Session()
+
+    webadd = "https://www.acnc.gov.au/charity/people/" + str(t_webid) 
+    response = session.get(webadd)
+
+
+     # Parse web page
+
+    if response.status_code==200:
+        html_org = response.text # Get the text elements of the page.
+
+
+        # Save results to file
+
+        outfile = "./trustees-webpages/aus-trustee-" + str(t_webid) + "-" + ddate + ".txt"
+        with open(outfile, "w") as f:
+            f.write(html_org)
+
+        print("Downloaded web page of trustee: {}".format(t_webid))    
+        print("\r")
+        print("Web page file is here: '{}'".format(outfile))
+
+    else:
+        print("\r")
+        print("Could not download web page of trustee: {}".format(t_webid))
+
+
+
+# Download ACNC web pages of charities - from file #
+
+def trustees_webpage_download_from_file(infile: str="./masterfiles/aus-trustees-master.csv", **args):
+    """
+        Takes a CSV file containing webids for trustees of Australian charities and
+        downloads a trustee's web page from the ACNC website, which can be parsed at a later date.
+
+        Takes one mandatory argument:
+            - CSV file containing a list of webids for trustees of Australian charities
+
+        Dependencies:
+            - trustees 
+
+        Issues:
+    """
+
+    # Read in data
+
+    df = pd.read_csv(infile, encoding = "ISO-8859-1", index_col=False) # import file
+
+
+    # Request web pages
+
+    for row in df.itertuples():
+        t_webid = getattr(row, "t_webid")
+        t_webid = t_webid[16:]
+        trustees_webpage_download(t_webid)
+
+    print("\r")
+    print("Finished downloading web pages for trustees in file: {}".format(infile))
+
+
+
+def trusteeships(source: str, **args):
+    """
+        Takes a trustee's webpage (.txt file) downloaded from the ACNC website and
+        extracts the list of trusteeships held.
+
+        Takes one mandatory argument:
+            - A directory with .txt files containing HTML code of a trustee's ACNC web page
+
+        Dependencies:
+            - trustees_webpage_download | trustees_webpage_download_from_file
+
+        Issues:       
+    """
+
+    # Create folders
+    
+    try:
+        os.mkdir("trusteeships")
+        os.mkdir("trusteeships/logs")
+    except OSError as error:
+        print(error)
+        print("Folders already exist") 
+
+    ddate = dt.now().strftime("%Y-%m-%d") # get today's date
+
+
+    # Define output files
+
+    trusteeships = "./trusteeships/aus-trusteeships-" + ddate + ".csv"
+    masterfile = "./masterfiles/aus-trusteeships-master.csv"
+
+    # Define variable names for the output files
+
+    tvarnames = ["t_webid", "abn", "name", "town", "state", "postcode", "note"]
+
+
+    # Write headers to the output files
+
+    with open(trusteeships, "w", newline="") as f:
+        writer = csv.writer(f, tvarnames)
+        writer.writerow(tvarnames)
+
+
+    # Read data
+
+    source = "C:/Users/t95171dm/aus-char-data/trustees-webpages"
+
+    for file in os.listdir(source):
+        if file.endswith(".txt"):
+            t_webid = file[12:44] # extract trustee webid from file name
+            f = os.path.join(source, file)
+            with open(f, "r") as f:
+                data = f.read()
+                soup_org = soup(data, "html.parser") # Parse the text as a BS object.
+            
+
+        # Locate and extract trusteeship information
+
+        trudetails = soup_org.find("div", class_="field field-name-acnc-node-people-charities field-type-ds field-label-hidden")
+
+        if trudetails.find("div", class_="view-empty"): # If there is no reporting information
+            with open(trusteeships, "a", newline="") as f:
+                row = t_webid, "NULL", "NULL", "NULL", "NULL", "NULL", "No trusteeship information"
+                writer = csv.writer(f)
+                writer.writerow(row)
+
+        elif trudetails.find("div", class_="view-content"):
+            trucontent = trudetails.find("div", class_="view-content")
+            trutable = trucontent.find("tbody").find_all("tr")
+            for row in trutable:
+                td_list = row.find_all("td")
+                print(td_list)
+                try:
+                    abn = td_list[0].find("a").text.strip() # ABN
+                except:
+                    abn = "NULL"
+                try:
+                    name = td_list[1].find("a").text.strip() # Name of charity
+                except:
+                    name = "NULL"
+                town = td_list[2].text.strip() # Town of charity
+                state = td_list[3].text.strip() # State of charity
+                postcode = td_list[3].text.strip() # Postcode of charity   
+                note = "NULL"
+                row = t_webid, abn, name, town, state, postcode, note  
+                with open(trusteeships, "a", newline="") as f:
+                    writer = csv.writer(f)
+                    writer.writerow(row)
+                
+        else: # Could not find trusteeship details
+            with open(trusteeships, "a", newline="") as f:
+                row = t_webid, "NULL", "NULL", "NULL", "NULL", "NULL", "Could not find trusteeship information on web page"
+                writer = csv.writer(f)
+                writer.writerow(row)
+
+
+
 # Main program #
 
 if __name__ == "__main__":
@@ -813,20 +1131,23 @@ if __name__ == "__main__":
     roc_parser = subparsers.add_parser("roc", help="Download latest copy of Charity Register")
     roc_parser.set_defaults(func=roc_download)
 
-    webid_parser = subparsers.add_parser("webids", help="Fetch ACNC web id of a charity")
+    ais_parser = subparsers.add_parser("ais", help="Download latest versions of Annual Information Statement (AIS) returns")
+    ais_parser.set_defaults(func=ais_download)
+
+    webid_parser = subparsers.add_parser("webid", help="Fetch ACNC web id of a charity")
     webid_parser.add_argument("abn", help="Australian Business Number of charity")
     webid_parser.set_defaults(func=webid_download)
 
-    webid_file_parser = subparsers.add_parser("webids_file", help="Fetch ACNC web ids - from a file")
+    webid_file_parser = subparsers.add_parser("webid_file", help="Fetch ACNC web ids - from a file")
     webid_file_parser.add_argument("infile", nargs="*", default="./masterfiles/aus-abn-master.csv", help="Location of file containing list of ABNs - e.g., './masterfiles/aus-abn-master.csv'")
     webid_file_parser.set_defaults(func=webid_download_from_file)
 
-    webpage_parser = subparsers.add_parser("webpages", help="Fetch ACNC web page of charity and save as a .txt file")
+    webpage_parser = subparsers.add_parser("webpage", help="Fetch ACNC web page of charity and save as a .txt file")
     webpage_parser.add_argument("webid", help="ACNC web id of charity")
     webpage_parser.add_argument("abn", help="Australian Business Number of charity")
     webpage_parser.set_defaults(func=webpage_download)
 
-    webpage_file_parser = subparsers.add_parser("webpages_file", help="Fetch ACNC web page of charity and save as a .txt file - from a file")
+    webpage_file_parser = subparsers.add_parser("webpage_file", help="Fetch ACNC web page of charity and save as a .txt file - from a file")
     webpage_file_parser.add_argument("infile", nargs="*", default="./masterfiles/aus-webids-master.csv", help="Location of file containing list of ACNC webids for charities")
     webpage_file_parser.set_defaults(func=webpage_download_from_file)
 
@@ -841,6 +1162,18 @@ if __name__ == "__main__":
     trustee_parser = subparsers.add_parser("trustees", help="Fetch trustee records of charity from ACNC web page (.txt file)")
     trustee_parser.add_argument("source", help="Location of .txt files containing ACNC web pages - e.g., './webpages/'")
     trustee_parser.set_defaults(func=trustees)
+
+    trustee_webpage_parser = subparsers.add_parser("trustee_webpage", help="Fetch ACNC web page of trustee and save as a .txt file")
+    trustee_webpage_parser.add_argument("t_webid", help="ACNC web id of trustee")
+    trustee_webpage_parser.set_defaults(func=trustees_webpage_download)
+
+    trustee_webpage_file_parser = subparsers.add_parser("trustee_webpage_file", help="Fetch ACNC web page of trustee and save as a .txt file - from a file")
+    trustee_webpage_file_parser.add_argument("infile", nargs="*", default="./masterfiles/aus-trustees-master.csv", help="Location of file containing list of ACNC webids for trustees")
+    trustee_webpage_file_parser.set_defaults(func=trustees_webpage_download_from_file)
+
+    trusteeships_parser = subparsers.add_parser("trusteeships", help="Fetch trusteeship records of trustee from ACNC web page (.txt file)")
+    trusteeships_parser.add_argument("source", help="Location of .txt files containing ACNC trustee web pages - e.g., './webpages/'")
+    trusteeships_parser.set_defaults(func=trusteeships)
 
     args = parser.parse_args()
     args.func(**args.__dict__)
