@@ -1116,6 +1116,35 @@ def trusteeships(source: str, **args):
                 writer.writerow(row)
 
 
+# Delete files #
+
+def file_delete(source: list, ext: str="", **args):
+    """
+        Deletes files in a given folder. After you have finished extracting the information you want
+        from the downloaded web pages, it is good practice to delete the .txt files containing the
+        web pages.
+
+        Takes one mandatory and one optional argument:
+            - A list of directories containing files [mandatory]
+            - A file type to delete (e.g., .txt), else all files deleted [optional]
+
+        Dependencies:
+            - NONE
+
+        Issues:       
+    """
+
+    for directory in source:
+        for file in os.listdir(directory):
+            if file.lower().endswith(str(ext)):
+                f = os.path.join(directory, file)
+                os.remove(f)
+        print("Finished deleting files in {}".format(directory))
+    
+    print("\r")         
+    print("Finished deleting files in all directories supplied")
+
+
 
 # Main program #
 
@@ -1123,7 +1152,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Download Australian Charity Data")
     parser.add_argument("-v", "--verbose", action='store_true', help="More descriptive output")
 
-    subparsers = parser.add_subparsers(help="Operation to perform")
+    subparsers = parser.add_subparsers(help="Operation to perform:")
 
     test_parser = subparsers.add_parser("test", help="Test to check script is running")
     test_parser.set_defaults(func=test)
@@ -1174,6 +1203,11 @@ if __name__ == "__main__":
     trusteeships_parser = subparsers.add_parser("trusteeships", help="Fetch trusteeship records of trustee from ACNC web page (.txt file)")
     trusteeships_parser.add_argument("source", help="Location of .txt files containing ACNC trustee web pages - e.g., './webpages/'")
     trusteeships_parser.set_defaults(func=trusteeships)
+
+    delete_parser = subparsers.add_parser("delete", help="Fetch trusteeship records of trustee from ACNC web page (.txt file)")
+    delete_parser.add_argument("source", nargs="+", help="List of directories containing files you want to delete - e.g., './webpages/' './temp'")
+    delete_parser.add_argument("--ext", nargs="*", default="", help="File extension of files you want to delete - e.g., '.txt'")
+    delete_parser.set_defaults(func=file_delete)
 
     args = parser.parse_args()
     args.func(**args.__dict__)
