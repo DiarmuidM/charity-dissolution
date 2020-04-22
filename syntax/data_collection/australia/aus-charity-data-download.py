@@ -11,6 +11,7 @@ import requests
 import os
 import argparse
 import json
+import random
 import csv
 import pandas as pd
 
@@ -229,7 +230,7 @@ def webid_download(abn: str, **args) -> tuple:
         Downloads a charity's ACNC web id i.e., its unique identifier
         on the Regulator's website.
 
-        Takes one mandatory argument:
+        Takes one mandatory :
             - Australian Business Number of a charity
 
         Dependencies:
@@ -269,13 +270,14 @@ def webid_download(abn: str, **args) -> tuple:
 
 # Collect ACNC web ids for charities - from file
 
-def webid_download_from_file(infile: str="./masterfiles/aus-abn-master.csv", **args):
+def webid_download_from_file(infile: str="./masterfiles/aus-abn-master.csv", prop: float=1.0, **args):
     """
         Takes a CSV file containing ABN numbers, extracts them, and returns a file containing
         a webid for each ABN.
 
-        Takes one mandatory arguments:
-            - CSV file containing a list of abns for Australian charities
+        Takes one mandatory and one optional argument:
+            - CSV file containing a list of abns for Australian charities [mandatory]
+            - Proportion of charities to collect webids for; default is all (1.0) [optional]
 
         Dependencies:
             - roc_download 
@@ -308,7 +310,8 @@ def webid_download_from_file(infile: str="./masterfiles/aus-abn-master.csv", **a
     # Read in data
 
     roc = pd.read_csv(infile, encoding = "ISO-8859-1", index_col=False) # import file
-    roc_list = roc["abn"].values.tolist() # convert ABN column to a list
+    roc = roc.sample(frac=perc)  
+    roc_list = roc["abn"].values.tolist() # convert abn column to a list
 
 
     # Request web pages
@@ -452,13 +455,14 @@ def webpage_download(webid: str, abn: str, **args):
 
 # Download ACNC web pages of charities - from file #
 
-def webpage_download_from_file(infile: str="./masterfiles/aus-webids-master.csv", **args):
+def webpage_download_from_file(infile: str="./masterfiles/aus-webids-master.csv", prop: float=1.0, **args):
     """
         Takes a CSV file containing webids for Australian charities and
         downloads a charity's web page from the ACNC website, which can be parsed at a later date.
 
-        Takes one mandatory argument:
-            - CSV file containing a list of abns and webids for Australian charities
+        Takes one mandatory and one optional argument:
+            - CSV file containing a list of abns and webids for Australian charities [mandatory]
+            - Proportion of charities to download web pages for; default is all (1.0) [optional]
 
         Dependencies:
             - webid_download | webid_download_from_file 
@@ -470,6 +474,7 @@ def webpage_download_from_file(infile: str="./masterfiles/aus-webids-master.csv"
     # Read in data
 
     df = pd.read_csv(infile, encoding = "ISO-8859-1", index_col=False) # import file
+    df = df.sample(frac=prop) # take random sample (default is to keep all rows in dataframe)
 
 
     # Request web pages
@@ -925,6 +930,25 @@ def trustees(source: str, **args):
                     writer = csv.writer(f)
                     writer.writerow(row)  
 
+    
+    # Write to master file
+
+    tfile = pd.read_csv(trufile, encoding = "ISO-8859-1", index_col=False)
+
+    if not os.path.isfile(masterfile): # if master file doesn't exist, create it
+        tfile.to_csv(masterfile, index=False)
+
+    else: # it exists, so append new observations to it
+        master = pd.read_csv(masterfile, encoding = "ISO-8859-1", index_col=False)
+        tfile = tfile.merge(master, on="t_webid", how="left", indicator=True, suffixes=("", "_y"))
+        tfile_new = tfile.loc[tfile["_merge"]=="left_only"]
+
+        if len(tfile_new) > 0: # if there are new observations, then write to master list
+            tfile_new.to_csv(masterfile, mode="a", header=False, index=False)
+        else: # if there are no new observations, then continue
+            pass   
+
+
     print("\r")
     print("Finished extracting trustee data from charity web pages found in: {}".format(source))
 
@@ -937,7 +961,7 @@ def trustees_webpage_download(t_webid: str, **args):
         This web page contains information on other trusteeships held by that individual.
 
         Takes one mandatory argument:
-            - website id of trustee i.e., its unique identifier on the regulator's website
+            - website id of trustee i.e., its unique identifier on the regulator's website [mandatory]
 
         Dependencies:
             - trustees 
@@ -989,13 +1013,14 @@ def trustees_webpage_download(t_webid: str, **args):
 
 # Download ACNC web pages of charities - from file #
 
-def trustees_webpage_download_from_file(infile: str="./masterfiles/aus-trustees-master.csv", **args):
+def trustees_webpage_download_from_file(infile: str="./masterfiles/aus-trustees-master.csv", prop: float=1.0, **args):
     """
         Takes a CSV file containing webids for trustees of Australian charities and
         downloads a trustee's web page from the ACNC website, which can be parsed at a later date.
 
-        Takes one mandatory argument:
-            - CSV file containing a list of webids for trustees of Australian charities
+        Takes one mandatory and one optional argument:
+            - CSV file containing a list of webids for trustees of Australian charities [mandatory]
+            - Proportion of trustees to download web pages for; default is all (1.0) [optional]
 
         Dependencies:
             - trustees 
@@ -1006,6 +1031,7 @@ def trustees_webpage_download_from_file(infile: str="./masterfiles/aus-trustees-
     # Read in data
 
     df = pd.read_csv(infile, encoding = "ISO-8859-1", index_col=False) # import file
+    df = df.sample(frac=prop)
 
 
     # Request web pages
@@ -1053,7 +1079,7 @@ def trusteeships(source: str, **args):
 
     # Define variable names for the output files
 
-    tvarnames = ["t_webid", "abn", "name", "town", "state", "postcode", "note"]
+    tvarnames = ["t_webid", "abn", "tship_id", "name", "town", "state", "postcode", "note"]
 
 
     # Write headers to the output files
@@ -1082,7 +1108,7 @@ def trusteeships(source: str, **args):
 
         if trudetails.find("div", class_="view-empty"): # If there is no reporting information
             with open(trusteeships, "a", newline="") as f:
-                row = t_webid, "NULL", "NULL", "NULL", "NULL", "NULL", "No trusteeship information"
+                row = t_webid, "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "No trusteeship information"
                 writer = csv.writer(f)
                 writer.writerow(row)
 
@@ -1104,16 +1130,35 @@ def trusteeships(source: str, **args):
                 state = td_list[3].text.strip() # State of charity
                 postcode = td_list[3].text.strip() # Postcode of charity   
                 note = "NULL"
-                row = t_webid, abn, name, town, state, postcode, note  
+                tship_id = str(t_webid) + "-" + str(abn)
+                row = t_webid, abn, tship_id, name, town, state, postcode, note  
                 with open(trusteeships, "a", newline="") as f:
                     writer = csv.writer(f)
                     writer.writerow(row)
                 
         else: # Could not find trusteeship details
             with open(trusteeships, "a", newline="") as f:
-                row = t_webid, "NULL", "NULL", "NULL", "NULL", "NULL", "Could not find trusteeship information on web page"
+                row = t_webid, "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "Could not find trusteeship information on web page"
                 writer = csv.writer(f)
                 writer.writerow(row)
+
+
+    # Write to master file
+
+    tfile = pd.read_csv(trusteeships, encoding = "ISO-8859-1", index_col=False)
+
+    if not os.path.isfile(masterfile): # if master file doesn't exist, create it
+        tfile.to_csv(masterfile, index=False)
+
+    else: # it exists, so append new observations to it
+        master = pd.read_csv(masterfile, encoding = "ISO-8859-1", index_col=False)
+        tfile = tfile.merge(master, on="tship_id", how="left", indicator=True, suffixes=("", "_y"))
+        tfile_new = tfile.loc[tfile["_merge"]=="left_only"]
+
+        if len(tfile_new) > 0: # if there are new observations, then write to master list
+            tfile_new.to_csv(masterfile, mode="a", header=False, index=False)
+        else: # if there are no new observations, then continue
+            pass   
 
 
 # Delete files #
@@ -1169,6 +1214,7 @@ if __name__ == "__main__":
 
     webid_file_parser = subparsers.add_parser("webid_file", help="Fetch ACNC web ids - from a file")
     webid_file_parser.add_argument("infile", nargs="*", default="./masterfiles/aus-abn-master.csv", help="Location of file containing list of ABNs - e.g., './masterfiles/aus-abn-master.csv'")
+    webid_file_parser.add_argument("--prop", nargs="*", default=1.0, help="Proportion of charities to collect webids for; default is all")
     webid_file_parser.set_defaults(func=webid_download_from_file)
 
     webpage_parser = subparsers.add_parser("webpage", help="Fetch ACNC web page of charity and save as a .txt file")
@@ -1178,6 +1224,7 @@ if __name__ == "__main__":
 
     webpage_file_parser = subparsers.add_parser("webpage_file", help="Fetch ACNC web page of charity and save as a .txt file - from a file")
     webpage_file_parser.add_argument("infile", nargs="*", default="./masterfiles/aus-webids-master.csv", help="Location of file containing list of ACNC webids for charities")
+    webpage_file_parser.add_argument("--prop", nargs="*", default=1.0, help="Proportion of charities to download web pages for; default is all")
     webpage_file_parser.set_defaults(func=webpage_download_from_file)
 
     history_parser = subparsers.add_parser("history", help="Fetch history of charity from ACNC web page (.txt file)")
@@ -1198,6 +1245,7 @@ if __name__ == "__main__":
 
     trustee_webpage_file_parser = subparsers.add_parser("trustee_webpage_file", help="Fetch ACNC web page of trustee and save as a .txt file - from a file")
     trustee_webpage_file_parser.add_argument("infile", nargs="*", default="./masterfiles/aus-trustees-master.csv", help="Location of file containing list of ACNC webids for trustees")
+    trustee_webpage_file_parser.add_argument("--prop", nargs="*", default=1.0, help="Proportion of trustees to download web pages for; default is all")
     trustee_webpage_file_parser.set_defaults(func=trustees_webpage_download_from_file)
 
     trusteeships_parser = subparsers.add_parser("trusteeships", help="Fetch trusteeship records of trustee from ACNC web page (.txt file)")
