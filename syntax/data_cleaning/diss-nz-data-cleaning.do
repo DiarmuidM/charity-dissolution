@@ -19,10 +19,12 @@
 
 /** 0. Define paths **/
 
-global dfiles "C:\Users\t95171dm\Dropbox" // location of data files
-global rfiles "C:\Users\t95171dm\projects\charity-dissolution" // location of syntax and outputs
+global dfiles "C:\Users\t95171dm\Dropbox\voluntas-paper" // location of data files
+global rfiles "C:\Users\t95171dm\projects\charity-dissolution" // location of syntax and other project outputs
+global fdate : di %tdCY-N-D daily("$S_DATE", "DMY")
+di "$fdate"
 
-include "$rfiles\syntax\project_paths.doi"
+include "$rfiles\syntax\project-paths.doi"
 
 
 /** 1. Import data **/
@@ -32,7 +34,7 @@ include "$rfiles\syntax\project_paths.doi"
 	Think about using the linked data sets also.
 */
 
-import delimited $path2\nz\Officers\nz_Officers_y0_m0_p0_integrity.csv, clear varn(1)
+import delimited $path2\nz-nov2020\Officers\nz_Officers_y0_m0_p0_integrity.csv, clear varn(1)
 desc, f
 count
 
@@ -108,7 +110,7 @@ sav $path1\nz_trustees_20190909.dta, replace
 
 ** Beneficiaries **
 
-import delimited $path2\nz\Beneficiaries\nz_Beneficiaries_y0_m0_p0_integrity.csv, clear varn(1)
+import delimited $path2\nz-nov2020\Beneficiaries\nz_Beneficiaries_y0_m0_p0_integrity.csv, clear varn(1)
 desc, f
 count
 
@@ -135,7 +137,7 @@ sav $path3\nz_beneficiaries_20190909.dta, replace
 
 ** Sector **
 
-import delimited $path2\nz\Sectors\nz_Sectors_y0_m0_p0_integrity.csv, clear varn(1)
+import delimited $path2\nz-nov2020\Sectors\nz_Sectors_y0_m0_p0_integrity.csv, clear varn(1)
 desc, f
 count
 
@@ -165,7 +167,7 @@ sav $path3\nz_sectors_20190909.dta, replace
 
 ** Activties **
 
-import delimited $path2\nz\Activities\nz_Activities_y0_m0_p0_integrity.csv, clear varn(1)
+import delimited $path2\nz-nov2020\Activities\nz_Activities_y0_m0_p0_integrity.csv, clear varn(1)
 desc, f
 count
 
@@ -191,7 +193,7 @@ sav $path3\nz_activities_20190909.dta, replace
 
 ** Source of Funds **
 
-import delimited $path2\nz\SourceOfFunds\nz_SourceOfFunds_y0_m0_p0_integrity.csv, clear varn(1)
+import delimited $path2\nz-nov2020\SourceOfFunds\nz_SourceOfFunds_y0_m0_p0_integrity.csv, clear varn(1)
 desc, f
 count
 
@@ -217,7 +219,7 @@ sav $path3\nz_sources_20190909.dta, replace
 
 ** Area of Operation **
 
-import delimited $path2\nz\AreaOfOperations\nz_AreaOfOperations_y0_m0_p0_integrity.csv, clear varn(1)
+import delimited $path2\nz-nov2020\AreaOfOperations\nz_AreaOfOperations_y0_m0_p0_integrity.csv, clear varn(1)
 desc, f
 count
 
@@ -243,7 +245,7 @@ sav $path3\nz_aoo_20190909.dta, replace
 		
 ** Charity Register **
 
-import delimited $path2\nz\Organisations\nz_orgs_deregreasons_integrity.csv, clear
+import delimited $path2\nz-nov2020\Organisations\nz_orgs_deregreasons_integrity.csv, clear
 desc, f
 count
 
@@ -354,16 +356,13 @@ count
 		
 	codebook mainactivityid
 	rename mainactivityid actid
-	count if missing(real(actid))
-	replace actid = "" if missing(real(actid))
-	destring actid, replace
+	*count if missing(real(actid))
+	*replace actid = "" if missing(real(actid))
+	*destring actid, replace
 	
 	
 	codebook mainbeneficiaryid
 	rename mainbeneficiaryid benid
-	count if missing(real(benid))
-	replace benid = "" if missing(real(benid))
-	destring benid, replace
 	
 	
 	codebook mainsectorid
@@ -410,11 +409,11 @@ sav $path1\nz_charreg_20190909_v1.dta, replace
 
 ** Annual Returns **
 
-forvalues yr = 2007(1)2019 {
+forvalues yr = 2007(1)2020 {
 
 	di "Year: `yr'"
 
-	import delimited "$path2\nz\GrpOrgAllReturns\GrpOrgAllReturns_yr`yr'_integrity_geog.csv", clear
+	import delimited "$path2\nz\GrpOrgAllReturns\GrpOrgAllReturns_yr`yr'_integrity.csv", clear
 	
 	// Get rid of rows where the data has been corrupted
 	tab endofyeardayofmonth, missing
@@ -464,7 +463,7 @@ forvalues yr = 2007(1)2019 {
 	
 	drop if charityregistrationnumber=="."
 	drop if date_financialpos ==.
-	drop if year(date_financialpos)>=2020
+	drop if year(date_financialpos)>=2021
 	
 	gen areaop = max(geog1, geog2, geog3, geog4, geog5, geog6, geog7, geog8, geog9, geog10)
 	label define areaop_lab 1 "Provincial" 2 "National" 3 "International"
@@ -475,10 +474,10 @@ forvalues yr = 2007(1)2019 {
 
 	// Build panel data set
 
-	use "$path1\nz_annualreturn_2019_v1.dta", clear
-	gen year = 2019
+	use "$path1\nz_annualreturn_2020_v1.dta", clear
+	gen year = 2020
 
-	forvalues yr = 2007(1)2018 {
+	forvalues yr = 2007(1)2019 {
 
 		append using "$path1\nz_annualreturn_`yr'_v1.dta", force
 		replace year = `yr' if year==.
@@ -857,7 +856,7 @@ forvalues yr = 2007(1)2019 {
 	*/
 		
 sort ccnum fin_year
-save "$path1\nz_annualreturns_2007-2019_v1.dta", replace
+save "$path1\nz_annualreturns_2007-2020_v1.dta", replace
 
 	** Prepare teaching data set **
 	
@@ -925,7 +924,7 @@ rename _merge cr_merge
 	
 	preserve
 		keep if pickone
-		keep orgid orgtt orgct orgts orgct
+		keep orgid orgtt orgct
 		sort orgid
 		duplicates report orgid
 		sav $path1\nz_trustees_merge_20190909.dta, replace
@@ -1057,7 +1056,7 @@ use $path1\nz_charreg_20190909_v1.dta, clear
 	*/
 	
 	gen orgage = .
-	replace orgage = fin_year - regy if deregistered==0
+	replace orgage = 2020 - regy if deregistered==0
 	replace orgage = remy - regy if deregistered==1
 	tab orgage
 	l ccnum regy remy fin_year orgage deregistered in 1/100
